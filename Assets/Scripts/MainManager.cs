@@ -3,31 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
 
 public class MainManager : MonoBehaviour
 {
-    public Brick BrickPrefab;
-    public int LineCount = 6;
-    public Rigidbody Ball;
-
-    public Text ScoreText;
-    public GameObject GameOverText;
-    public Text highScoreText;
-    private static int highScore = 9;
-    private bool m_Started = false;
-    private int m_Points;
-    
-    private bool m_GameOver = false;
-
-    
-    // Start is called before the first frame update
-    void Start()
+    public static MainManager Instance;
+    private void Awake()
     {
+        m_GameOver = false;
         SetHighScore();
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
-        int[] pointCountArray = new [] {1,1,2,2,5,5};
+
+        int[] pointCountArray = new[] { 1, 1, 2, 2, 5, 5 };
         for (int i = 0; i < LineCount; ++i)
         {
             for (int x = 0; x < perLine; ++x)
@@ -39,9 +27,28 @@ public class MainManager : MonoBehaviour
             }
         }
     }
+
+    public Brick BrickPrefab;
+    public int LineCount = 6;
+    public Rigidbody Ball;
+
+    public Text ScoreText;
+    public GameObject GameOverText;
+    public Text highScoreText;
+    private bool m_Started = false;
+    private int m_Points;
+    private bool m_GameOver;
+
+    
+    // Start is called before the first frame update
+    void Start()
+    {
+       
+    }
+   
     void SetHighScore()
     {
-        highScoreText.text = $"Best Score: " + highScore + " Name: 0";
+        highScoreText.text = $"Best Score: " + DataKeeper.highScore + " Name: "+DataKeeper.topPlayer;
     }
     private void Update()
     {
@@ -62,7 +69,7 @@ public class MainManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                SceneManager.LoadScene(0);
             }
         }
     }
@@ -70,17 +77,19 @@ public class MainManager : MonoBehaviour
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        ScoreText.text = $"Score : {m_Points}  "+DataKeeper.playerName;
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
-        if (highScore < m_Points)
+        if (DataKeeper.highScore < m_Points)
         {
-            highScore = m_Points;
+            DataKeeper.highScore = m_Points;
+            DataKeeper.topPlayer = DataKeeper.playerName;
             SetHighScore();
+            DataKeeper.Instance.SaveScore();
         }
     }
 }
